@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>设计资源库 Z · Designer Vault</title>
+<meta name="description" content="设计师资源导航：神器网站、AI 工具、灵感网站、免费中文字体、免费西文字体、素材网站、品牌规范与设计知识，一站式收藏。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="cover">
+  <div class="cover-inner">
+    <div class="cover-badge">✦ Designer Vault</div>
+    <h1>设计资源库 <span class="z">Z</span></h1>
+    <p class="subtitle">一位设计师的私人收藏，长期更新 · 神器网站 / AI 工具 / 灵感 / 免费字体 / 素材 / 品牌规范</p>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<nav class="toolbar" id="toolbar">
+  <div class="toolbar-inner">
+    <div class="chips" id="chips"></div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="searchInput" type="text" placeholder="搜索资源名称 / 标签…" autocomplete="off">
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section class="section" id="section">
+    <div class="section-head">
+      <h2 id="sectionTitle">全部</h2>
+      <span class="section-count" id="sectionCount"></span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty" hidden>
+      <div class="empty-icon">🔍</div>
+      <p>没有找到匹配的资源，换个关键词试试～</p>
+    </div>
+  </section>
+</main>
+
+<button id="backTop" title="回到顶部" aria-label="回到顶部">↑</button>
+
+<footer>
+  <p>🗂️ <b>设计资源库 Z</b> — 收藏即用，长期维护 · 本站仅收录资源链接，各资源版权归原作者所有，商用前请自行确认授权。</p>
+  <p class="foot-links">
+    <a href="https://github.com/KINGKAZMAX/DesignVault-Z" target="_blank" rel="noopener">GitHub</a>
+    <span>·</span>
+    <span>灵感整理参考自设计师社区的公开分享</span>
+  </p>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
