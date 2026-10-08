@@ -152,7 +152,10 @@ def by_cat(records, cat, tag=None):
 
 
 def main():
-    data = json.load(open("data/source-snapshot.json", encoding="utf-8"))
+    from pathlib import Path
+    base_dir = Path(__file__).resolve().parent
+    snapshot = base_dir / "data" / "source-snapshot.json"
+    data = json.loads(snapshot.read_text(encoding="utf-8"))
     items = []
 
     items += clean_tools(data)
@@ -350,8 +353,13 @@ def main():
         it["host"] = host(it["url"])
         final.append(it)
 
-    json.dump(final, open("data/items-clean.json", "w", encoding="utf-8"),
-              ensure_ascii=False, indent=1)
+    # 输出路径固定锚定到脚本所在目录，避免受运行时工作目录影响
+    out_json = base_dir / "data" / "items-clean.json"
+    out_js = base_dir / "docs" / "assets" / "data.js"
+    out_js.parent.mkdir(parents=True, exist_ok=True)
+
+    with out_json.open("w", encoding="utf-8") as f:
+        json.dump(final, f, ensure_ascii=False, indent=1)
 
     # 生成 data.js
     cats = {}
@@ -359,7 +367,8 @@ def main():
         cats[it["cat"]] = cats.get(it["cat"], 0) + 1
     js = ("// DesignVault-Z 站点数据（名称/链接/分类为事实性元数据，描述为本项目撰写）\n"
           "const DATA = " + json.dumps(final, ensure_ascii=False, indent=1) + ";\n")
-    open("docs/assets/data.js", "w", encoding="utf-8").write(js)
+    with out_js.open("w", encoding="utf-8") as f:
+        f.write(js)
     print(json.dumps(cats, ensure_ascii=False, indent=1))
     print("TOTAL:", len(final))
 

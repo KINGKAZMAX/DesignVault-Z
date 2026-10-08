@@ -48,7 +48,7 @@
     var list = DATA.filter(function (it) {
       if (state.cat !== "全部" && it.cat !== state.cat) return false;
       if (!q) return true;
-      var hay = (it.name + " " + (it.desc || "") + " " + (it.tags || []).join(" ") + " " + it.host).toLowerCase();
+      var hay = (it.name + " " + (it.desc || "") + " " + (it.tags || []).join(" ") + " " + it.cat + " " + it.host).toLowerCase();
       return hay.indexOf(q) > -1;
     });
 
@@ -73,12 +73,16 @@
     icon.className = "favicon";
     icon.textContent = it.name.charAt(0).toUpperCase();
     var domain = it.host.replace(/^www\./, "");
-    if (domain) {
+    if (domain && /^https?:$/.test(location.protocol || "https:")) {
+      // 直接加载目标站点 favicon，失败则保留字母头像
       var img = new Image();
       img.loading = "lazy";
       img.alt = "";
-      img.src = "https://icons.duckduckgo.com/ip3/" + domain + ".ico";
-      img.onload = function () { icon.textContent = ""; icon.appendChild(img); };
+      img.referrerPolicy = "no-referrer";
+      img.src = "https://" + domain + "/favicon.ico";
+      img.onload = function () {
+        if (img.naturalWidth > 1) { icon.textContent = ""; icon.appendChild(img); }
+      };
     }
 
     var nameBox = document.createElement("div");
