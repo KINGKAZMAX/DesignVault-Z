@@ -5,32 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>设计资源库 Z · Designer Vault</title>
 <meta name="description" content="设计师资源导航：神器网站、AI 工具、灵感网站、免费中文字体、免费西文字体、素材网站、品牌规范与设计知识，一站式收藏。">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
-<link rel="stylesheet" href="assets/style.css?v=4">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f0701a'/><text x='50' y='72' font-size='58' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>Z</text></svg>">
+<link rel="stylesheet" href="assets/style.css?v=5">
 </head>
 <body>
 
-<header class="cover">
-  <div class="cover-inner">
-    <div class="cover-badge">✦ Designer Vault</div>
-    <h1>设计资源库 <span class="z">Z</span></h1>
-    <p class="subtitle">一位设计师的私人收藏，长期更新 · 神器网站 / AI 工具 / 灵感 / 免费字体 / 素材 / 品牌规范</p>
-    <div class="stats" id="stats"></div>
-  </div>
-</header>
+<header class="cover-banner" aria-hidden="true"></header>
 
-<nav class="toolbar" id="toolbar">
-  <div class="toolbar-inner">
+<div class="wrap">
+  <div class="page-head">
+    <div class="page-icon" aria-hidden="true">Z</div>
+    <h1>设计资源库</h1>
+  </div>
+  <p class="intro">Designer Vault · 已收录 363 个精选设计资源，覆盖 10 个分类，长期更新 —— 神器网站 / AI 工具 / 灵感网站 / 免费字体 / 素材 / 品牌规范 / 设计知识。</p>
+
+  <nav class="toolbar">
     <div class="chips" id="chips"></div>
     <div class="search">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      <input id="searchInput" type="text" placeholder="搜索资源名称 / 标签…" autocomplete="off">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="searchInput" type="text" placeholder="搜索资源…" autocomplete="off">
     </div>
-  </div>
-</nav>
+  </nav>
 
-<main>
-  <section class="section" id="section">
+  <main>
     <div class="section-head">
       <h2 id="sectionTitle">全部</h2>
       <span class="section-count" id="sectionCount"></span>
@@ -40,8 +37,8 @@
       <div class="empty-icon">🔍</div>
       <p>没有找到匹配的资源，换个关键词试试～</p>
     </div>
-  </section>
-</main>
+  </main>
+</div>
 
 <button id="backTop" title="回到顶部" aria-label="回到顶部">↑</button>
 
@@ -54,7 +51,7 @@
   </p>
 </footer>
 
-<script src="assets/data.js?v=4"></script>
-<script src="assets/app.js?v=4"></script>
+<script src="assets/data.js?v=5"></script>
+<script src="assets/app.js?v=5"></script>
 </body>
 </html>

@@ -1,14 +1,9 @@
-/* DesignVault-Z 交互逻辑：分类过滤 + 实时搜索 + 哈希路由 */
+/* DesignVault Z 交互：分类过滤 + 实时搜索 + 哈希路由（卡片版式对齐原 FlowUs 画廊） */
 (function () {
   "use strict";
 
   var CAT_ORDER = ["设计神器", "AI 网站", "灵感网站", "素材网站", "实用网站", "中文字体", "西文字体", "品牌规范", "设计知识", "设计便利"];
-  var CAT_ICON = {
-    "设计神器": "✨", "AI 网站": "🤖", "灵感网站": "💡", "素材网站": "📦",
-    "实用网站": "🧰", "中文字体": "🇨🇳", "西文字体": "🔤", "品牌规范": "📘",
-    "设计知识": "📚", "设计便利": "⚡"
-  };
-  var CAT_DEFAULT_DESC = {
+  var DEFAULT_DESC = {
     "设计神器": "在线效果生成器 · 即开即用",
     "AI 网站": "AI 生成工具",
     "灵感网站": "设计灵感参考",
@@ -29,53 +24,9 @@
   var sectionTitle = document.getElementById("sectionTitle");
   var sectionCount = document.getElementById("sectionCount");
   var emptyEl = document.getElementById("empty");
-  var statsEl = document.getElementById("stats");
   var backTop = document.getElementById("backTop");
 
-  // ---------- 渲染分类 ----------
-  var catCount = {};
-  DATA.forEach(function (it) { catCount[it.cat] = (catCount[it.cat] || 0) + 1; });
-
-  var cats = ["全部"].concat(CAT_ORDER.filter(function (c) { return catCount[c]; }));
-  cats.forEach(function (cat) {
-    var el = document.createElement("button");
-    el.className = "chip";
-    el.dataset.cat = cat;
-    var n = cat === "全部" ? DATA.length : catCount[cat];
-    el.innerHTML = (CAT_ICON[cat] ? CAT_ICON[cat] + " " : "") + esc(cat) + ' <span class="n">' + n + "</span>";
-    el.addEventListener("click", function () { setCat(cat); });
-    chipsEl.appendChild(el);
-  });
-
-  // ---------- 顶部统计 ----------
-  statsEl.innerHTML =
-    '<span><b>' + DATA.length + "</b>个精选资源</span>" +
-    '<span><b>' + Object.keys(catCount).length + "</b>个分类</span>" +
-    '<span><b>' + DATA.filter(function (d) { return d.cat.indexOf("字体") > -1; }).length + "</b>款免费可商用字体</span>" +
-    '<span><b>' + catCount["设计神器"] + "</b>个在线神器</span>";
-
-  // ---------- 过滤 ----------
-  function apply() {
-    var q = state.q.trim().toLowerCase();
-    var list = DATA.filter(function (it) {
-      if (state.cat !== "全部" && it.cat !== state.cat) return false;
-      if (!q) return true;
-      var hay = (it.name + " " + (it.desc || "") + " " + (it.tags || []).join(" ") + " " + it.cat + " " + it.host).toLowerCase();
-      return hay.indexOf(q) > -1;
-    });
-
-    sectionTitle.textContent = (CAT_ICON[state.cat] ? CAT_ICON[state.cat] + " " : "") + state.cat;
-    sectionCount.textContent = list.length + " 项";
-
-    var frag = document.createDocumentFragment();
-    list.forEach(function (it) { frag.appendChild(card(it)); });
-    grid.innerHTML = "";
-    grid.appendChild(frag);
-    emptyEl.hidden = list.length > 0;
-    faPump();
-  }
-
-  // ---------- favicon 队列：限流加载，避免并发触发图标服务限流 ----------
+  // ---------- favicon 限流队列（并发 6，代理 → 站点直连 → 字母兜底） ----------
   var faQueue = [];
   var faActive = 0;
 
@@ -87,7 +38,7 @@
   }
 
   function faLoad(job) {
-    var icon = job.icon;
+    var holder = job.holder;
     var img = new Image();
     img.alt = "";
     img.referrerPolicy = "no-referrer";
@@ -97,15 +48,14 @@
       done = true;
       faActive--;
       if (ok && img.naturalWidth) {
-        icon.textContent = "";
-        icon.appendChild(img);
+        holder.textContent = "";
+        holder.appendChild(img);
       }
       faPump();
     };
     img.onload = function () { finish(true); };
     img.onerror = function () {
       if (done) return;
-      // 代理失败 → 目标站点直连兜底
       img.onload = function () { finish(true); };
       img.onerror = function () { finish(false); };
       img.src = "https://" + job.domain + "/favicon.ico";
@@ -113,73 +63,100 @@
     img.src = "https://favicon.im/" + job.domain + "?larger=true";
   }
 
+  // ---------- 分类按钮（原版样式：文字 + 全角括号计数） ----------
+  var catCount = {};
+  DATA.forEach(function (it) { catCount[it.cat] = (catCount[it.cat] || 0) + 1; });
+
+  var cats = ["全部"].concat(CAT_ORDER.filter(function (c) { return catCount[c]; }));
+  cats.forEach(function (cat) {
+    var el = document.createElement("button");
+    el.className = "chip";
+    el.dataset.cat = cat;
+    var n = cat === "全部" ? DATA.length : catCount[cat];
+    el.textContent = cat + "（" + n + "）";
+    el.addEventListener("click", function () { setCat(cat); });
+    chipsEl.appendChild(el);
+  });
+
+  // ---------- 过滤与渲染 ----------
+  function apply() {
+    var q = state.q.trim().toLowerCase();
+    var list = DATA.filter(function (it) {
+      if (state.cat !== "全部" && it.cat !== state.cat) return false;
+      if (!q) return true;
+      var hay = (it.name + " " + (it.desc || DEFAULT_DESC[it.cat] || "") + " " +
+        (it.tags || []).join(" ") + " " + it.cat + " " + it.host).toLowerCase();
+      return hay.indexOf(q) > -1;
+    });
+
+    sectionTitle.textContent = state.cat === "全部" ? "全部" : state.cat;
+    sectionCount.textContent = list.length + " 项";
+
+    var frag = document.createDocumentFragment();
+    list.forEach(function (it) { frag.appendChild(card(it)); });
+    grid.innerHTML = "";
+    grid.appendChild(frag);
+    emptyEl.hidden = list.length > 0;
+    faPump();
+  }
+
+  var DOC_ICON_SVG =
+    '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<path fill="currentColor" fill-opacity="0.85" d="M11.15 1c.27 0 .53.11.72.31l4.85 5.1c.18.19.28.44.28.7v9.19c0 .7-.26 1.38-.75 1.89-.49.51-1.16.8-1.87.8H5.62c-.71 0-1.39-.3-1.87-.81-.49-.51-.76-1.19-.76-1.89V3.7c0-.7.26-1.39.75-1.9.48-.51 1.15-.8 1.86-.8h5.55zM5.62 3c-.14 0-.28.06-.4.19-.12.13-.2.31-.2.51v12.6c0 .2.08.38.2.51.12.13.26.19.4.19h8.76c.15 0 .29-.06.41-.19.12-.13.19-.31.19-.51V8h-3.4a1 1 0 0 1-1-1V3H5.62zM13 6h1.58L13 4.34V6zm-.25 7.25a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1 0-1.5h6zm0-3a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1 0-1.5h6z"/></svg>';
+
+  var GO_ICON_SVG =
+    '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+
   function card(it) {
     var a = document.createElement("a");
     a.className = "card";
     a.href = it.url;
     a.target = "_blank";
     a.rel = "noopener noreferrer";
+    a.title = it.name;
 
+    // 封面区：居中站点图标
+    var cover = document.createElement("div");
+    cover.className = "card-cover";
     var icon = document.createElement("div");
-    icon.className = "favicon";
+    icon.className = "site-icon";
     icon.textContent = it.name.charAt(0).toUpperCase();
-    var domain = it.host.replace(/^www\./, "");
+    cover.appendChild(icon);
+
+    var domain = (it.host || "").replace(/^www\./, "");
     if (domain && /^https?:$/.test(location.protocol || "https:")) {
-      faQueue.push({ icon: icon, domain: domain });
+      faQueue.push({ holder: icon, domain: domain });
     }
 
-    var nameBox = document.createElement("div");
-    var name = document.createElement("div");
+    // 标题栏：文档小图标 + 名称
+    var title = document.createElement("div");
+    title.className = "card-title";
+    var docIcon = document.createElement("span");
+    docIcon.innerHTML = DOC_ICON_SVG;
+    var name = document.createElement("span");
     name.className = "card-name";
     name.textContent = it.name;
-    var hostEl = document.createElement("span");
-    hostEl.className = "card-host";
-    hostEl.textContent = domain || "直达链接";
-    nameBox.appendChild(name);
-    nameBox.appendChild(hostEl);
-
-    var top = document.createElement("div");
-    top.className = "card-top";
-    top.appendChild(icon);
-    top.appendChild(nameBox);
+    title.appendChild(docIcon);
+    title.appendChild(name);
 
     var go = document.createElement("div");
     go.className = "card-go";
-    go.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+    go.innerHTML = GO_ICON_SVG;
 
-    a.appendChild(top);
+    a.appendChild(cover);
+    a.appendChild(title);
     a.appendChild(go);
-
-    var d = document.createElement("div");
-    d.className = "card-desc";
-    d.textContent = it.desc || CAT_DEFAULT_DESC[it.cat] || "直达链接";
-    a.appendChild(d);
-
-    var tags = (it.tags || []).slice(0, 3);
-    if (tags.length) {
-      var box = document.createElement("div");
-      box.className = "card-tags";
-      tags.forEach(function (t) {
-        var s = document.createElement("span");
-        s.className = "tag";
-        s.textContent = t;
-        box.appendChild(s);
-      });
-      a.appendChild(box);
-    }
     return a;
   }
 
-  // ---------- 状态 ----------
+  // ---------- 状态与路由 ----------
   function setCat(cat) {
     state.cat = cat;
     Array.prototype.forEach.call(chipsEl.children, function (c) {
       c.classList.toggle("active", c.dataset.cat === cat);
     });
     apply();
-    if ("#" + cat !== decodeURIComponent(location.hash).replace(/^#/, "#")) {
-      history.replaceState(null, "", cat === "全部" ? "#" : "#" + encodeURIComponent(cat));
-    }
+    history.replaceState(null, "", cat === "全部" ? "#" : "#" + encodeURIComponent(cat));
     var active = chipsEl.querySelector(".chip.active");
     if (active && active.scrollIntoView) {
       active.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
@@ -202,12 +179,6 @@
   backTop.addEventListener("click", function () {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
-
-  function esc(s) {
-    return String(s).replace(/[&<>"]/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
-    });
-  }
 
   // 初始：支持 #中文字体 直达
   var init = decodeURIComponent(location.hash.replace(/^#/, ""));
