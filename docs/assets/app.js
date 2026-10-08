@@ -8,6 +8,18 @@
     "实用网站": "🧰", "中文字体": "🇨🇳", "西文字体": "🔤", "品牌规范": "📘",
     "设计知识": "📚", "设计便利": "⚡"
   };
+  var CAT_DEFAULT_DESC = {
+    "设计神器": "在线效果生成器 · 即开即用",
+    "AI 网站": "AI 生成工具",
+    "灵感网站": "设计灵感参考",
+    "素材网站": "设计素材资源",
+    "实用网站": "在线实用工具",
+    "中文字体": "免费可商用中文字体",
+    "西文字体": "免费可商用西文字体",
+    "品牌规范": "品牌与设计系统规范",
+    "设计知识": "设计学习资源",
+    "设计便利": "设计师效率工具"
+  };
 
   var state = { cat: "全部", q: "" };
 
@@ -122,7 +134,7 @@
     name.textContent = it.name;
     var hostEl = document.createElement("span");
     hostEl.className = "card-host";
-    hostEl.textContent = domain;
+    hostEl.textContent = domain || "直达链接";
     nameBox.appendChild(name);
     nameBox.appendChild(hostEl);
 
@@ -138,12 +150,10 @@
     a.appendChild(top);
     a.appendChild(go);
 
-    if (it.desc) {
-      var d = document.createElement("div");
-      d.className = "card-desc";
-      d.textContent = it.desc;
-      a.appendChild(d);
-    }
+    var d = document.createElement("div");
+    d.className = "card-desc";
+    d.textContent = it.desc || CAT_DEFAULT_DESC[it.cat] || "直达链接";
+    a.appendChild(d);
 
     var tags = (it.tags || []).slice(0, 3);
     if (tags.length) {
