@@ -74,15 +74,25 @@
     icon.textContent = it.name.charAt(0).toUpperCase();
     var domain = it.host.replace(/^www\./, "");
     if (domain && /^https?:$/.test(location.protocol || "https:")) {
-      // 直接加载目标站点 favicon，失败则保留字母头像
+      // 图标加载链：favicon.im 代理 → 目标站点直连 → 保留字母头像
       var img = new Image();
       img.loading = "lazy";
       img.alt = "";
       img.referrerPolicy = "no-referrer";
-      img.src = "https://" + domain + "/favicon.ico";
-      img.onload = function () {
-        if (img.naturalWidth > 1) { icon.textContent = ""; icon.appendChild(img); }
+      var applied = false;
+      var apply = function () {
+        if (applied || !img.naturalWidth) return;
+        applied = true;
+        icon.textContent = "";
+        icon.appendChild(img);
       };
+      img.onload = apply;
+      img.onerror = function () {
+        if (applied) return;
+        img.onload = apply;
+        img.src = "https://" + domain + "/favicon.ico";
+      };
+      img.src = "https://favicon.im/" + domain + "?larger=true";
     }
 
     var nameBox = document.createElement("div");
