@@ -60,6 +60,45 @@
     grid.innerHTML = "";
     grid.appendChild(frag);
     emptyEl.hidden = list.length > 0;
+    faPump();
+  }
+
+  // ---------- favicon 队列：限流加载，避免并发触发图标服务限流 ----------
+  var faQueue = [];
+  var faActive = 0;
+
+  function faPump() {
+    while (faActive < 6 && faQueue.length) {
+      faActive++;
+      faLoad(faQueue.shift());
+    }
+  }
+
+  function faLoad(job) {
+    var icon = job.icon;
+    var img = new Image();
+    img.alt = "";
+    img.referrerPolicy = "no-referrer";
+    var done = false;
+    var finish = function (ok) {
+      if (done) return;
+      done = true;
+      faActive--;
+      if (ok && img.naturalWidth) {
+        icon.textContent = "";
+        icon.appendChild(img);
+      }
+      faPump();
+    };
+    img.onload = function () { finish(true); };
+    img.onerror = function () {
+      if (done) return;
+      // 代理失败 → 目标站点直连兜底
+      img.onload = function () { finish(true); };
+      img.onerror = function () { finish(false); };
+      img.src = "https://" + job.domain + "/favicon.ico";
+    };
+    img.src = "https://favicon.im/" + job.domain + "?larger=true";
   }
 
   function card(it) {
@@ -74,25 +113,7 @@
     icon.textContent = it.name.charAt(0).toUpperCase();
     var domain = it.host.replace(/^www\./, "");
     if (domain && /^https?:$/.test(location.protocol || "https:")) {
-      // 图标加载链：favicon.im 代理 → 目标站点直连 → 保留字母头像
-      var img = new Image();
-      img.loading = "lazy";
-      img.alt = "";
-      img.referrerPolicy = "no-referrer";
-      var applied = false;
-      var apply = function () {
-        if (applied || !img.naturalWidth) return;
-        applied = true;
-        icon.textContent = "";
-        icon.appendChild(img);
-      };
-      img.onload = apply;
-      img.onerror = function () {
-        if (applied) return;
-        img.onload = apply;
-        img.src = "https://" + domain + "/favicon.ico";
-      };
-      img.src = "https://favicon.im/" + domain + "?larger=true";
+      faQueue.push({ icon: icon, domain: domain });
     }
 
     var nameBox = document.createElement("div");
