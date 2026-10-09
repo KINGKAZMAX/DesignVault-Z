@@ -1,4 +1,4 @@
-/* DesignVault Z 交互：分类过滤 + 实时搜索 + 哈希路由（卡片版式对齐原 FlowUs 画廊） */
+/* DesignVault Z 交互：分类tab + 搜索 + 哈希路由；卡片 = 彩色渐变封面(大字标题+图标磁贴) + 白色标题栏 */
 (function () {
   "use strict";
 
@@ -16,6 +16,32 @@
     "设计便利": "设计师效率工具"
   };
 
+  /* 自建渐变色板：vivid 双色渐变，按名称哈希稳定取色 */
+  var GRADS = [
+    ["#ff4d4d", "#6e0512"],
+    ["#ffd93d", "#7a5c00"],
+    ["#43e97b", "#0a3d24"],
+    ["#4d8dff", "#0a1252"],
+    ["#ff4dd2", "#4d0a3d"],
+    ["#b4ff39", "#1a4d0a"],
+    ["#ff8a3c", "#7a2400"],
+    ["#8a5cff", "#1c0a52"],
+    ["#2ee6ff", "#06304d"],
+    ["#ff2e63", "#3d0011"],
+    ["#eaeaea", "#6e6e6e"],
+    ["#ffe27a", "#c22b45"],
+    ["#31d0aa", "#083a30"],
+    ["#f5d020", "#26260a"]
+  ];
+
+  function gradOf(name) {
+    var h = 0;
+    for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    var pair = GRADS[h % GRADS.length];
+    var angle = 150 + (h % 4) * 10;
+    return "linear-gradient(" + angle + "deg, " + pair[0] + " 0%, " + pair[1] + " 100%)";
+  }
+
   var state = { cat: "全部", q: "" };
 
   var grid = document.getElementById("grid");
@@ -26,7 +52,7 @@
   var emptyEl = document.getElementById("empty");
   var backTop = document.getElementById("backTop");
 
-  // ---------- favicon 限流队列（并发 6，代理 → 站点直连 → 字母兜底） ----------
+  /* ---------- favicon 限流队列（并发 6，代理 → 站点直连 → 字母兜底） ---------- */
   var faQueue = [];
   var faActive = 0;
 
@@ -63,7 +89,12 @@
     img.src = "https://favicon.im/" + job.domain + "?larger=true";
   }
 
-  // ---------- 分类按钮（原版样式：文字 + 全角括号计数） ----------
+  /* ---------- 分类 tab（网格小图标 + 名称 + 半角括号计数，激活黑下划线） ---------- */
+  var GRID_ICON_SVG =
+    '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">' +
+    '<rect x="1" y="1" width="6" height="6" rx="1.2"/><rect x="9" y="1" width="6" height="6" rx="1.2"/>' +
+    '<rect x="1" y="9" width="6" height="6" rx="1.2"/><rect x="9" y="9" width="6" height="6" rx="1.2"/></svg>';
+
   var catCount = {};
   DATA.forEach(function (it) { catCount[it.cat] = (catCount[it.cat] || 0) + 1; });
 
@@ -73,12 +104,21 @@
     el.className = "chip";
     el.dataset.cat = cat;
     var n = cat === "全部" ? DATA.length : catCount[cat];
-    el.textContent = cat + "（" + n + "）";
+    var icon = document.createElement("span");
+    icon.innerHTML = GRID_ICON_SVG;
+    var label = document.createElement("span");
+    label.textContent = cat;
+    var cnt = document.createElement("span");
+    cnt.className = "cnt";
+    cnt.textContent = "(" + n + ")";
+    el.appendChild(icon);
+    el.appendChild(label);
+    el.appendChild(cnt);
     el.addEventListener("click", function () { setCat(cat); });
     chipsEl.appendChild(el);
   });
 
-  // ---------- 过滤与渲染 ----------
+  /* ---------- 过滤与渲染 ---------- */
   function apply() {
     var q = state.q.trim().toLowerCase();
     var list = DATA.filter(function (it) {
@@ -115,20 +155,30 @@
     a.rel = "noopener noreferrer";
     a.title = it.name;
 
-    // 封面区：居中站点图标
+    // 渐变封面：大字标题 + 居中图标磁贴
     var cover = document.createElement("div");
     cover.className = "card-cover";
+    cover.style.background = gradOf(it.name);
+
+    var coverTitle = document.createElement("div");
+    coverTitle.className = "cover-title";
+    coverTitle.textContent = it.name;
+
+    var stage = document.createElement("div");
+    stage.className = "cover-stage";
     var icon = document.createElement("div");
     icon.className = "site-icon";
     icon.textContent = it.name.charAt(0).toUpperCase();
-    cover.appendChild(icon);
+    stage.appendChild(icon);
+    cover.appendChild(coverTitle);
+    cover.appendChild(stage);
 
     var domain = (it.host || "").replace(/^www\./, "");
     if (domain && /^https?:$/.test(location.protocol || "https:")) {
       faQueue.push({ holder: icon, domain: domain });
     }
 
-    // 标题栏：文档小图标 + 名称
+    // 白色标题栏：文档小图标 + 名称
     var title = document.createElement("div");
     title.className = "card-title";
     var docIcon = document.createElement("span");
@@ -149,7 +199,7 @@
     return a;
   }
 
-  // ---------- 状态与路由 ----------
+  /* ---------- 状态与路由 ---------- */
   function setCat(cat) {
     state.cat = cat;
     Array.prototype.forEach.call(chipsEl.children, function (c) {
