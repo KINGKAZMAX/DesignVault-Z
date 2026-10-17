@@ -3722,5 +3722,16 @@ const DATA = [
   "tags": [],
   "desc": "前端技巧与速查表",
   "host": "css-tricks.com"
+ },
+ {
+  "name": "Doc2X",
+  "url": "https://doc2x.noedgeai.com/",
+  "cat": "实用网站",
+  "tags": [
+   "文档处理",
+   "OCR"
+  ],
+  "desc": "PDF、扫描件、图片转 Word/Markdown/LaTeX，支持公式表格识别及文档翻译；需账号，有限免费与付费升级，云端处理，API 另计费。",
+  "host": "doc2x.noedgeai.com"
  }
 ];
