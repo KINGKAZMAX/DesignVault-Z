@@ -3364,6 +3364,14 @@ const DATA = [
   "host": "squoosh.app"
  },
  {
+  "name": "FileOnTap",
+  "url": "https://fileontap.com/heic-to-png/",
+  "cat": "实用网站",
+  "tags": ["免费"],
+  "desc": "免费浏览器端 HEIC 转 PNG 工具，文件不上传",
+  "host": "fileontap.com"
+ },
+ {
   "name": "Photopea",
   "url": "https://www.photopea.com/",
   "cat": "实用网站",
