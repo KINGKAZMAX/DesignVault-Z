@@ -3228,6 +3228,16 @@ const DATA = [
   "host": "lovart.ai"
  },
  {
+  "name": "Kite",
+  "url": "https://kite.new/",
+  "cat": "AI 网站",
+  "tags": [
+   "免费"
+  ],
+  "desc": "AI 智能体（Claude、Cursor、Codex）通过 MCP 直接画可编辑图层的协作设计工具，可导出 HTML / React / Tailwind",
+  "host": "kite.new"
+ },
+ {
   "name": "Tapnow",
   "url": "https://app.tapnow.ai/home",
   "cat": "AI 网站",
